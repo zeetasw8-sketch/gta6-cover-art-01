@@ -4,7 +4,9 @@
 //   node serve.ts --port 8123
 // It sends the MIME types an offline web app needs, refuses any path
 // outside app/, and otherwise does nothing clever: a development
-// convenience, not a web server for the internet.
+// convenience, not a web server for the internet. The screenshot and test
+// scripts run it with --port on their own ports; the app itself needs no
+// server at all — opening app/index.html straight from disk works too.
 import { createReadStream, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize, resolve, sep } from 'node:path';

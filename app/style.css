@@ -73,7 +73,7 @@ body {
 
 .brand p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
 
-.top-actions { display: flex; gap: 10px; }
+.top-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
 button {
   font: inherit;
@@ -86,6 +86,13 @@ button {
 }
 
 button:hover { border-color: var(--accent-2); }
+
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+button:disabled:hover { border-color: var(--line); }
 
 button.primary {
   background: var(--accent);
@@ -158,6 +165,15 @@ button.primary {
 
 .file-btn input { display: none; }
 
+.ghost-btn {
+  display: block;
+  width: 100%;
+  margin: 8px 0 2px;
+  padding: 9px 12px;
+  background: transparent;
+  border-style: dashed;
+}
+
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .chip {
@@ -198,6 +214,7 @@ button.primary {
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.12);
   cursor: crosshair;
   background: #0a0618;
+  touch-action: none;
 }
 
 .stage-hint { color: var(--muted); font-size: 13px; margin: 0; }

@@ -20,7 +20,7 @@
     {
         "h": 720,
         "name": "4-cover.jpg",
-        "query": "?shot=cover&photo=neon&caption=Night%20Shift&layout=six&grade=neon&size=wide",
+        "query": "?shot=cover&photo=neon&caption=Night%20Shift&layout=tilted&grade=neon&size=wide",
         "w": 1280
     }
 ]

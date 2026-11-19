@@ -2,11 +2,13 @@
 //
 // The app is this directory's app/ folder: plain static files a desktop
 // browser loads offline (app/index.html and its ES modules, vendored fonts,
-// three original sample scenes, no network request at runtime). This program
-// hands it in: it copies app/ and screenshots/ from beside this file to
-// /output and writes /output/dossier.json, the summary the judge reads,
-// with the vendored make.fun library (vendor/makefun-app.ts, the kit's own
-// copy, byte for byte the scorer's).
+// three original sample scenes, no network request at runtime). The cover
+// engine inside draws 8 layouts (six grids, a nine-panel grid and tilted
+// polaroid snapshots), 6 grades, a halftone title band and undo/redo.
+// This program hands it in: it copies app/ and screenshots/ from beside
+// this file to /output and writes /output/dossier.json, the summary the
+// judge reads, with the vendored make.fun library (vendor/makefun-app.ts,
+// the kit's own copy, byte for byte the scorer's).
 //
 // Serve it locally with `node serve.ts`, then open http://localhost:8080.
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:

@@ -18,6 +18,9 @@
     </div>
   </div>
   <div class="top-actions">
+    <button id="undo" type="button" title="Undo (Ctrl+Z)">&#8617; Undo</button>
+    <button id="redo" type="button" title="Redo (Ctrl+Y)">Redo &#8618;</button>
+    <button id="shuffle" type="button" title="Random layout, grade and title">Surprise me</button>
     <button id="export" type="button" class="primary">Export PNG</button>
     <button id="export-all" type="button">All 4 sizes</button>
   </div>
@@ -26,10 +29,11 @@
   <section class="controls" aria-label="Cover controls">
     <div class="group" id="dropzone">
       <h2>1 &middot; Photos</h2>
-      <p>Drop photos here, or pick files. Click a panel in the preview to edit it.</p>
+      <p>Drop photos here, or pick files. Click a panel in the preview to edit it — drag it to pan, scroll to zoom.</p>
       <label class="file-btn">Choose photos
         <input id="photo" type="file" accept="image/*" multiple>
       </label>
+      <button id="fill-all" type="button" class="ghost-btn">Fill all panels with this photo</button>
       <p class="hint">Or try a sample scene:</p>
       <div id="sample-picks" class="chips"></div>
       <p class="hint">Photos are processed in your browser only — nothing is uploaded.</p>
@@ -57,6 +61,7 @@
       <h2>4 &middot; Grade</h2>
       <div id="grade-picks" class="chips"></div>
       <label class="check"><input id="grain-toggle" type="checkbox" checked> Film grain + vignette</label>
+      <label class="check"><input id="halftone-toggle" type="checkbox" checked> Halftone dots on the title band</label>
     </div>
     <div class="group">
       <h2>5 &middot; Lettering</h2>
@@ -82,7 +87,7 @@
   </section>
   <section class="stage" aria-label="Cover preview">
     <canvas id="cover" width="1080" height="1350" aria-label="The cover preview"></canvas>
-    <p class="stage-hint">Click any panel to select it, then zoom, pan or swap its photo.</p>
+    <p class="stage-hint">Click any panel to select it, then drag to pan, scroll to zoom, or swap its photo.</p>
   </section>
 </main>
 <footer>

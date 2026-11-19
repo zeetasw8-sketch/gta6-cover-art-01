@@ -3,6 +3,9 @@
 // every pixel comes from the photos the user loaded plus gradients, type
 // and grain drawn here. Pure functions of (state, photos) so the live
 // preview and the exported PNG are the same drawing at different sizes.
+//
+// Layouts: six straight grids, a nine-panel grid, and a tilted snapshot
+// layout whose panels sit like scattered polaroids with white frames.
 
 export const LAYOUTS = {
   solo:   { name: 'Solo',   panels: [[0, 0, 1, 1]] },
@@ -11,6 +14,8 @@ export const LAYOUTS = {
   hero:   { name: 'Hero + 2', panels: [[0, 0, 1, 0.62], [0, 0.62, 0.5, 0.38], [0.5, 0.62, 0.5, 0.38]] },
   quad:   { name: 'Quad',   panels: [[0, 0, 0.5, 0.5], [0.5, 0, 0.5, 0.5], [0, 0.5, 0.5, 0.5], [0.5, 0.5, 0.5, 0.5]] },
   six:    { name: 'Six Up', panels: [[0, 0, 1 / 3, 0.5], [1 / 3, 0, 1 / 3, 0.5], [2 / 3, 0, 1 / 3, 0.5], [0, 0.5, 1 / 3, 0.5], [1 / 3, 0.5, 1 / 3, 0.5], [2 / 3, 0.5, 1 / 3, 0.5]] },
+  nine:   { name: 'Nine Up', panels: [[0, 0, 1 / 3, 1 / 3], [1 / 3, 0, 1 / 3, 1 / 3], [2 / 3, 0, 1 / 3, 1 / 3], [0, 1 / 3, 1 / 3, 1 / 3], [1 / 3, 1 / 3, 1 / 3, 1 / 3], [2 / 3, 1 / 3, 1 / 3, 1 / 3], [0, 2 / 3, 1 / 3, 1 / 3], [1 / 3, 2 / 3, 1 / 3, 1 / 3], [2 / 3, 2 / 3, 1 / 3, 1 / 3]] },
+  tilted: { name: 'Tilted', tilted: true, panels: [[0.01, 0.02, 0.57, 0.60], [0.60, 0.04, 0.39, 0.42], [0.60, 0.50, 0.39, 0.44], [0.03, 0.66, 0.55, 0.30]], tilt: [-0.045, 0.05, -0.035, 0.025] },
 };
 
 export const GRADES = {
@@ -51,15 +56,37 @@ export function grainPattern(ctx) {
   return grainTile;
 }
 
-/** Draw one photo into a panel rect, cover-fit, with zoom and pan. */
-export function drawPhotoInto(ctx, photo, rect, panel) {
+/**
+ * Draw one panel: white polaroid frame when tilted, the photo cover-fit
+ * with zoom and pan, then the grade wash and a hairline. Everything is
+ * drawn in a rotated frame around the panel centre when `tilt` is set,
+ * so the tilted layout reads as scattered snapshots.
+ */
+export function drawPanel(ctx, photo, rect, panel, grade, tilt) {
   const { x, y, w, h } = rect;
+  const cx = x + w / 2;
+  const cy = y + h / 2;
   ctx.save();
+  ctx.translate(cx, cy);
+  if (tilt) ctx.rotate(tilt);
+  const hw = w / 2;
+  const hh = h / 2;
+  if (tilt) {
+    const bw = Math.max(4, Math.min(w, h) * 0.035);
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = Math.max(8, Math.min(w, h) * 0.03);
+    ctx.shadowOffsetY = Math.max(4, Math.min(w, h) * 0.012);
+    ctx.fillStyle = '#fdfdf6';
+    ctx.fillRect(-hw - bw, -hh - bw, w + bw * 2, h + bw * 2);
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+  }
   ctx.beginPath();
-  ctx.rect(x, y, w, h);
+  ctx.rect(-hw, -hh, w, h);
   ctx.clip();
   ctx.fillStyle = '#1b1030';
-  ctx.fillRect(x, y, w, h);
+  ctx.fillRect(-hw, -hh, w, h);
   if (photo) {
     const iw = photo.naturalWidth || photo.width;
     const ih = photo.naturalHeight || photo.height;
@@ -69,28 +96,27 @@ export function drawPhotoInto(ctx, photo, rect, panel) {
     const ph = ih * scale;
     const ox = (panel.ox || 0) * w * 0.25;
     const oy = (panel.oy || 0) * h * 0.25;
-    ctx.drawImage(photo, x + (w - pw) / 2 + ox, y + (h - ph) / 2 + oy, pw, ph);
+    ctx.drawImage(photo, (w - pw) / 2 + ox - hw, (h - ph) / 2 + oy - hh, pw, ph);
   } else {
     ctx.fillStyle = '#241640';
-    ctx.fillRect(x, y, w, h);
+    ctx.fillRect(-hw, -hh, w, h);
     ctx.fillStyle = 'rgba(255,255,255,0.55)';
     ctx.font = `600 ${Math.max(14, h * 0.045)}px system-ui, sans-serif`;
     ctx.textAlign = 'center';
-    ctx.fillText('ADD A PHOTO', x + w / 2, y + h / 2);
+    ctx.textBaseline = 'middle';
+    ctx.fillText('ADD A PHOTO', 0, 0);
   }
-  ctx.restore();
-}
-
-/** The grade wash: a sunset/neon gradient rising from the foot of a rect. */
-export function gradeWash(ctx, rect, grade) {
-  const { x, y, w, h } = rect;
-  const g = ctx.createLinearGradient(0, y + h * 0.25, 0, y + h);
+  const g = ctx.createLinearGradient(0, -hh + h * 0.25, 0, hh);
   g.addColorStop(0, grade.top);
   g.addColorStop(1, grade.bottom);
   ctx.fillStyle = g;
-  ctx.fillRect(x, y, w, h);
+  ctx.fillRect(-hw, -hh, w, h);
   ctx.fillStyle = grade.wash;
-  ctx.fillRect(x, y, w, h);
+  ctx.fillRect(-hw, -hh, w, h);
+  ctx.strokeStyle = tilt ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.85)';
+  ctx.lineWidth = Math.max(2, Math.min(w, h) * 0.004);
+  ctx.strokeRect(-hw, -hh, w, h);
+  ctx.restore();
 }
 
 /** Vignette: darkened corners so the panels feel like a printed poster. */
@@ -102,7 +128,30 @@ export function vignette(ctx, w, h, strength) {
   ctx.fillRect(0, 0, w, h);
 }
 
-/** The title block: eyebrow, big Anton title, neon script subtitle. */
+/** Halftone dots along the top edge of the title band, poster-print style. */
+export function halftoneBand(ctx, w, bandY, grade) {
+  const step = Math.max(10, w * 0.012);
+  ctx.save();
+  for (let row = 0; row < 2; row++) {
+    for (let x = step / 2 + row * (step / 2); x < w; x += step) {
+      const r = (1.2 + 2.6 * (0.5 + 0.5 * Math.sin(x * 0.021 + row * 1.7))) * (w / 1080);
+      ctx.beginPath();
+      ctx.arc(x, bandY + 4 + row * step * 0.55, Math.max(1, r), 0, Math.PI * 2);
+      ctx.fillStyle = row === 0 ? grade.ink : '#ffffff';
+      ctx.globalAlpha = row === 0 ? 0.5 : 0.28;
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+/**
+ * The title block: eyebrow, big Anton title, neon script subtitle.
+ * The three lines are measured first and shrunk together until the whole
+ * stack fits inside the band at every export size — nothing is ever
+ * clipped at the foot of the cover, at 1080 x 1080, 1080 x 1350,
+ * 1920 x 1080 or 1080 x 1920.
+ */
 export function titleBlock(ctx, w, h, state, grade) {
   const bandH = h * (state.sizeKey === 'story' ? 0.20 : 0.24);
   const bandY = h - bandH;
@@ -112,17 +161,51 @@ export function titleBlock(ctx, w, h, state, grade) {
   g.addColorStop(1, 'rgba(10,6,24,0.92)');
   ctx.fillStyle = g;
   ctx.fillRect(0, bandY, w, bandH);
+  if (state.halftone !== false) halftoneBand(ctx, w, bandY, grade);
   const cx = w / 2;
   const eyebrow = (state.eyebrow || '').trim().toUpperCase();
   const title = (state.title || '').trim().toUpperCase();
   const subtitle = (state.subtitle || '').trim();
-  // Stack the three lines inside the band: sizes are band-relative so the
-  // subtitle never runs past the foot of the cover, at any export size.
-  let y = bandY + bandH * 0.10;
+  const maxW = w * 0.92;
+  // Measure, then shrink each line until it fits the cover width.
+  let es = Math.max(10, bandH * 0.115);
   if (eyebrow) {
-    const es = Math.max(10, bandH * 0.115);
+    while (es > 10) {
+      ctx.font = `700 ${es}px system-ui, sans-serif`;
+      try { ctx.letterSpacing = `${es * 0.42}px`; } catch (e) { /* older canvas */ }
+      if (ctx.measureText(eyebrow).width <= maxW) break;
+      es -= 1;
+    }
+  }
+  let size = Math.min(h * 0.105 * (state.titleScale || 1), bandH * 0.44);
+  if (title) {
+    while (size > 18) {
+      ctx.font = `${size}px Anton, 'Arial Black', sans-serif`;
+      if (ctx.measureText(title).width <= maxW) break;
+      size -= 4;
+    }
+  }
+  let ss = Math.max(12, bandH * 0.20);
+  if (subtitle) {
+    while (ss > 12) {
+      ctx.font = `${ss}px Pacifico, cursive`;
+      if (ctx.measureText(subtitle).width <= maxW) break;
+      ss -= 2;
+    }
+  }
+  // Stack the lines, then scale the whole stack down if it is taller
+  // than the band, and centre it vertically inside the band.
+  const stackH = (eyebrow ? es * 1.45 : 0) + (title ? size * 1.12 : 0) + (subtitle ? ss * 1.30 : 0);
+  const avail = bandH * 0.94;
+  const fit = stackH > 0 ? Math.min(1, avail / stackH) : 1;
+  es *= fit;
+  size *= fit;
+  ss *= fit;
+  let y = bandY + (bandH - stackH * fit) / 2;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  if (eyebrow) {
     ctx.font = `700 ${es}px system-ui, sans-serif`;
-    ctx.textAlign = 'center';
     ctx.fillStyle = grade.ink;
     try { ctx.letterSpacing = `${es * 0.42}px`; } catch (e) { /* older canvas */ }
     ctx.fillText(eyebrow, cx, y + es);
@@ -130,14 +213,7 @@ export function titleBlock(ctx, w, h, state, grade) {
     y += es * 1.45;
   }
   if (title) {
-    let size = Math.min(h * 0.105 * (state.titleScale || 1), bandH * 0.44);
     ctx.font = `${size}px Anton, 'Arial Black', sans-serif`;
-    while (ctx.measureText(title).width > w * 0.92 && size > 18) {
-      size -= 4;
-      ctx.font = `${size}px Anton, 'Arial Black', sans-serif`;
-    }
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
     ctx.lineJoin = 'round';
     ctx.strokeStyle = 'rgba(8,4,20,0.9)';
     ctx.lineWidth = Math.max(4, size * 0.10);
@@ -150,9 +226,7 @@ export function titleBlock(ctx, w, h, state, grade) {
     y += size * 1.12;
   }
   if (subtitle) {
-    const ss = Math.max(12, bandH * 0.20);
     ctx.font = `${ss}px Pacifico, cursive`;
-    ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
     ctx.shadowColor = grade.ink;
     ctx.shadowBlur = ss * 0.55;
@@ -187,11 +261,8 @@ export function drawCover(canvas, state, photos, sizeKey) {
       h: fh * inner.h - (fy > 0 ? gap / 2 : 0) - (fy + fh < 1 ? gap / 2 : 0),
     };
     const panel = state.panels[i] || {};
-    drawPhotoInto(ctx, photos[panel.photo] ?? null, rect, panel);
-    gradeWash(ctx, rect, grade);
-    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-    ctx.lineWidth = Math.max(2, gap * 0.5);
-    ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+    const tilt = layout.tilted ? (layout.tilt[i] || 0) : 0;
+    drawPanel(ctx, photos[panel.photo] ?? null, rect, panel, grade, tilt);
   }
   if (state.grain !== false) {
     ctx.save();
