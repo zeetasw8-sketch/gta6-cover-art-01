@@ -1,0 +1,26 @@
+[
+    {
+        "h": 720,
+        "name": "1-cover.jpg",
+        "query": "?shot=cover&photo=boulevard&caption=Neon%20Shore&layout=hero&grade=sunset&size=wide",
+        "w": 1280
+    },
+    {
+        "h": 900,
+        "name": "2-editor.jpg",
+        "query": "?shot=editor&photo=neon&caption=Night%20Shift&layout=quad&grade=neon&size=portrait",
+        "w": 1280
+    },
+    {
+        "h": 960,
+        "name": "3-cover.jpg",
+        "query": "?shot=cover&photo=pier&caption=Pier%20Pressure&layout=trio&grade=gold&size=portrait",
+        "w": 768
+    },
+    {
+        "h": 720,
+        "name": "4-cover.jpg",
+        "query": "?shot=cover&photo=neon&caption=Night%20Shift&layout=six&grade=neon&size=wide",
+        "w": 1280
+    }
+]
