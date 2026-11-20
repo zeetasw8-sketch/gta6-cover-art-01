@@ -3,20 +3,88 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cover Snap</title>
+<meta name="description" content="Vice Cover Lab: turn any photo into GTA-style multi-panel poster cover art and export it as a PNG.">
+<link rel="icon" href="data:,">
+<title>Vice Cover Lab — GTA-style cover art maker</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+<header class="topbar">
+  <div>
+    <h1>Vice Cover Lab</h1>
+    <p>Turn any photo into GTA-style poster cover art. Original art, drawn in code — no brand logos, no real people.</p>
+  </div>
+  <div class="top-actions">
+    <button id="undoBtn" type="button" disabled>↩ Undo</button>
+    <button id="redoBtn" type="button" disabled>↪ Redo</button>
+    <button id="surpriseBtn" type="button" class="accent">🎲 Surprise me</button>
+  </div>
+</header>
 <main class="app">
-  <section class="controls">
-    <h1>Cover Snap</h1>
-    <p>A photo and a caption, made into a square cover.</p>
-    <label>Photo <input id="photo" type="file" accept="image/*"></label>
-    <label>Caption <input id="caption" type="text" maxlength="40" value="Sunset Heist"></label>
-    <button id="export" type="button">Export PNG 1080 x 1080</button>
-    <p id="status" role="status"></p>
+  <aside class="controls" aria-label="Cover controls">
+    <section>
+      <h2>1-click posters</h2>
+      <div id="presetRow" class="chip-row" role="group" aria-label="Poster presets"></div>
+    </section>
+    <section>
+      <h2>Your photo</h2>
+      <label class="file-label">Add photos
+        <input id="photoInput" type="file" accept="image/*" multiple>
+      </label>
+      <p class="hint">Photos fill the selected panel. Drag on the preview to pan, scroll to zoom.</p>
+    </section>
+    <section>
+      <h2>Layout</h2>
+      <div id="layoutGrid" class="chip-row" role="group" aria-label="Panel layout"></div>
+    </section>
+    <section>
+      <h2>Colour grade</h2>
+      <div id="gradeGrid" class="chip-row swatches" role="group" aria-label="Colour grade"></div>
+      <label class="check"><input id="duotoneToggle" type="checkbox"> Duotone mode</label>
+      <label class="check"><input id="gridToggle" type="checkbox"> Rule-of-thirds grid</label>
+    </section>
+    <section>
+      <h2>Lettering</h2>
+      <label>Title <input id="titleInput" type="text" maxlength="32" value="VICE NIGHTS"></label>
+      <label>Subtitle <input id="subtitleInput" type="text" maxlength="32" value="Neon Shore"></label>
+      <label>Badge <input id="badgeInput" type="text" maxlength="28" value="VICE CITY • EST. 2026"></label>
+      <label class="check"><input id="showBadge" type="checkbox" checked> Show badge ribbon</label>
+      <label>Title size <input id="titleScale" type="range" min="0.7" max="1.3" step="0.05" value="1"></label>
+      <label>Title shadow <input id="shadowRange" type="range" min="0" max="1" step="0.1" value="0.6"></label>
+      <label class="check"><input id="outlineToggle" type="checkbox" checked> Bold outline on title</label>
+    </section>
+    <section>
+      <h2 id="panelLabel">Panel 1 of 3</h2>
+      <label>Fill with
+        <select id="panelSource"></select>
+      </label>
+      <label>Zoom <input id="panelZoom" type="range" min="1" max="3" step="0.05" value="1"></label>
+      <div class="row">
+        <button id="panelReset" type="button">Reset panel</button>
+        <button id="fillAllBtn" type="button">Fill all panels</button>
+      </div>
+    </section>
+    <section>
+      <h2>Export PNG</h2>
+      <label>Size
+        <select id="exportSize">
+          <option value="square">Square 1080 × 1080</option>
+          <option value="portrait">Portrait 1080 × 1350</option>
+          <option value="wide">Wide 1920 × 1080</option>
+          <option value="story">Story 1080 × 1920</option>
+        </select>
+      </label>
+      <div class="row">
+        <button id="exportBtn" type="button" class="accent">Export PNG</button>
+        <button id="exportAllBtn" type="button">Export all 4 sizes</button>
+      </div>
+      <p id="status" role="status"></p>
+    </section>
+  </aside>
+  <section class="stage" aria-label="Live preview">
+    <canvas id="preview" width="1080" height="1080" aria-label="The cover preview"></canvas>
+    <p class="hint">Click a panel to select it. Drag to pan, scroll to zoom. What you see is what the PNG gets.</p>
   </section>
-  <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
 </main>
 <script type="module" src="./src/main.js"></script>
 </body>
